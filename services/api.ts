@@ -274,6 +274,80 @@ export const checkPromptPayStatus = async (token: string): Promise<PromptPayStat
   throw new Error(json.message || "Failed to check payment status");
 };
 
+export const checkPaymentStatus = async (token: string): Promise<{
+    payment_id: number;
+    status: string;
+    confirmed_at: string | null;
+}> => {
+  const json = await apiRequest(`/payments/status?token=${token}`, {
+    method: 'GET'
+  });
+
+  if (json.success && json.data) {
+    return json.data;
+  }
+  throw new Error(json.message || "Failed to check payment status");
+};
+
+export const requestManualPayment = async (payload: {
+  cart_id: number;
+  location_id: number | string;
+  payment_method_id: number | string;
+  amount: number;
+  order_type: string;
+  proof_image?: File | null;
+}): Promise<any> => {
+  const formData = new FormData();
+  formData.append('cart_id', String(payload.cart_id));
+  formData.append('location_id', String(payload.location_id));
+  formData.append('payment_method', String(payload.payment_method_id));
+  formData.append('amount', String(payload.amount));
+  formData.append('order_type', payload.order_type);
+
+  if (payload.proof_image) {
+    formData.append('proof_image', payload.proof_image);
+  }
+
+  // Use raw fetch to handle FormData boundary correctly
+  const response = await fetch(`${API_BASE}/payments`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'X-API-Token': API_TOKEN
+      // Do NOT set Content-Type here, let browser set multipart/form-data boundary
+    },
+    body: formData
+  });
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    throw new Error(json.message || "Payment request failed");
+  }
+
+  if (json.success) {
+    return json.data;
+  }
+  throw new Error(json.message || "Failed to request payment");
+};
+
+export const placeOrder = async (payload: {
+  cart_id: number;
+  payment_method_id: number;
+  amount: number;
+  slip_image?: File;
+}): Promise<any> => {
+  // Alias to requestManualPayment for compatibility or direct usage
+  return requestManualPayment({
+      cart_id: payload.cart_id,
+      location_id: 0, // Fallback if not provided, but calling code should use requestManualPayment
+      payment_method_id: payload.payment_method_id,
+      amount: payload.amount,
+      order_type: 'dine_in',
+      proof_image: payload.slip_image
+  });
+};
+
 export const fetchOrderHistory = async (sessionId: string): Promise<OrderHistoryData> => {
   const json = await apiRequest(`/order-history?session_id=${sessionId}`, {
     method: 'GET'

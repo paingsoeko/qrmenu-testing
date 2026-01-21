@@ -1,4 +1,3 @@
-
 export interface LocationData {
   id: number | string;
   name: string;
@@ -104,6 +103,8 @@ export interface PaymentMethod {
     account_number?: string;
     account_type?: string;
     description?: string;
+    qrimage?: string;
+    qrimage_url?: string;
     [key: string]: any;
   };
 }

@@ -6,6 +6,7 @@ import { MenuPage } from './components/MenuPage';
 import { CartPage } from './components/CartPage';
 import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { LocationData, Table } from './types';
+import { AlertCircle } from 'lucide-react';
 
 const STORAGE_KEYS = {
   LOCATION: 'qr_menu_location',
@@ -13,6 +14,48 @@ const STORAGE_KEYS = {
   VIEWING_CART: 'qr_menu_viewing_cart',
   VIEWING_HISTORY: 'qr_menu_viewing_history'
 };
+
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-gray-50">
+            <div className="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-red-500" />
+                </div>
+                <h1 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h1>
+                <p className="text-gray-500 text-sm mb-6 break-words">{this.state.error?.message || "An unexpected error occurred."}</p>
+                <button 
+                    onClick={() => {
+                        localStorage.clear();
+                        window.location.reload();
+                    }} 
+                    className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors"
+                >
+                    Reset & Reload
+                </button>
+            </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const App: React.FC = () => {
   // Initialize state from localStorage to persist data on reload
@@ -121,50 +164,52 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Header 
-        title={title} 
-        subtitle={subtitle}
-        onBack={onBack}
-        onHistory={() => setIsViewingHistory(true)}
-        showHistory={showHistoryButton}
-      />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <Header 
+          title={title} 
+          subtitle={subtitle}
+          onBack={onBack}
+          onHistory={() => setIsViewingHistory(true)}
+          showHistory={showHistoryButton}
+        />
 
-      <main className="flex-1 flex flex-col">
-        {isViewingCart ? (
-          <CartPage 
-            onBack={() => setIsViewingCart(false)} 
-            location={selectedLocation} 
-          />
-        ) : isViewingHistory ? (
-          <OrderHistoryPage 
-            onBack={() => setIsViewingHistory(false)} 
-          />
-        ) : selectedTable && selectedLocation ? (
-          <MenuPage 
-            location={selectedLocation} 
-            table={selectedTable} 
-            onViewCart={() => setIsViewingCart(true)}
-          />
-        ) : selectedLocation ? (
-          <TableSelection 
-            location={selectedLocation} 
-            onSelect={setSelectedTable} 
-          />
-        ) : (
-          <LocationSelection onSelect={handleLocationSelect} />
+        <main className="flex-1 flex flex-col">
+          {isViewingCart ? (
+            <CartPage 
+              onBack={() => setIsViewingCart(false)} 
+              location={selectedLocation} 
+            />
+          ) : isViewingHistory ? (
+            <OrderHistoryPage 
+              onBack={() => setIsViewingHistory(false)} 
+            />
+          ) : selectedTable && selectedLocation ? (
+            <MenuPage 
+              location={selectedLocation} 
+              table={selectedTable} 
+              onViewCart={() => setIsViewingCart(true)}
+            />
+          ) : selectedLocation ? (
+            <TableSelection 
+              location={selectedLocation} 
+              onSelect={setSelectedTable} 
+            />
+          ) : (
+            <LocationSelection onSelect={handleLocationSelect} />
+          )}
+        </main>
+
+        {/* Footer (only show on selection screens to save space on menu) */}
+        {!selectedTable && !isViewingCart && !isViewingHistory && (
+          <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
+              <p>© {new Date().getFullYear()} GourmetQR. All rights reserved.</p>
+            </div>
+          </footer>
         )}
-      </main>
-
-      {/* Footer (only show on selection screens to save space on menu) */}
-      {!selectedTable && !isViewingCart && !isViewingHistory && (
-        <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
-          <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
-            <p>© {new Date().getFullYear()} GourmetQR. All rights reserved.</p>
-          </div>
-        </footer>
-      )}
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };
 
