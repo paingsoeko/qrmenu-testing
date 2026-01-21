@@ -1,0 +1,5 @@
+{
+  "name": "QR Menu Location Selector",
+  "description": "A stylish location selection interface for a restaurant QR menu system, featuring real-time data fetching and responsive design.",
+  "requestFramePermissions": []
+}
