@@ -1,3 +1,4 @@
+
 export interface LocationData {
   id: number | string;
   name: string;
@@ -122,13 +123,17 @@ export interface TableSessionData {
 export interface PromptPayQrData {
   payment_id: number;
   token: string;
-  client_secret: string;
+  client_secret?: string;
   qr_type: string;
   qr_code_url: string;
-  instruction_url: string;
+  instruction_url?: string;
   amount: number;
   currency: string;
-  expires_at: string;
+  expires_at?: string;
+}
+
+export interface StaffQrData extends PromptPayQrData {
+  // Staff QR shares structure with PromptPay QR for display purposes
 }
 
 export interface PromptPayStatusData {
@@ -179,6 +184,18 @@ export interface Order {
 export interface OrderHistoryData {
   current_orders: Order[];
   past_orders: Order[];
+}
+
+export interface Currency {
+  id: number;
+  business_id: number;
+  currency_type: string;
+  name: string;
+  country: string;
+  code: string;
+  symbol: string;
+  thoundsand_seprator: string; // Intentionally keeping the API typo from prompt description if it exists, or standardizing. Assuming "thoundsand_seprator" based on prompt.
+  decimal_separator: string | null;
 }
 
 export interface ApiResponse<T> {

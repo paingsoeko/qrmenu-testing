@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { PromptPayQrData, LocationData, Cart } from '../types';
-import { generatePromptPayQr, checkPromptPayStatus } from '../services/api';
+import { generatePromptPayQr, generateStaffQr, checkPromptPayStatus, checkPaymentStatus } from '../services/api';
 
 const QR_STORAGE_KEY = 'qr_menu_promptpay_data';
 
@@ -47,12 +47,22 @@ export const usePromptPay = (
     
     const pollStatus = async () => {
         try {
-            const statusData = await checkPromptPayStatus(qrData.token);
+            let isConfirmed = false;
+
+            // Differentiate check logic based on QR Type
+            if (qrData.qr_type === 'staff') {
+                const statusData = await checkPaymentStatus(qrData.token);
+                if (statusData.status === 'confirmed') isConfirmed = true;
+            } else {
+                // Default PromptPay
+                const statusData = await checkPromptPayStatus(qrData.token);
+                if (statusData.status === 'confirmed') isConfirmed = true;
+            }
             
             // Check if component is still mounted before state updates
             if (!isMountedRef.current) return;
 
-            if (statusData.status === 'confirmed') {
+            if (isConfirmed) {
                 localStorage.removeItem(QR_STORAGE_KEY);
                 setQrData(null);
                 setOrderPlaced(true);
@@ -60,7 +70,6 @@ export const usePromptPay = (
             }
             
             // If payment is pending, continue polling with standard interval
-            // Reset delay to standard 3s if we got a successful response (even if pending)
             currentDelay = 3000; 
             timeoutRef.current = setTimeout(pollStatus, currentDelay);
 
@@ -87,7 +96,7 @@ export const usePromptPay = (
     };
   }, [qrData, orderPlaced]);
 
-  const generateQr = async () => {
+  const generateQr = async (slug: string = 'promptpay') => {
       if (!cart || !location) {
           setQrError("Missing cart or location information.");
           return;
@@ -96,12 +105,19 @@ export const usePromptPay = (
       setLoadingQr(true);
       setQrError(null);
       try {
-          const data = await generatePromptPayQr({
-              cart_id: cart.id,
-              location_id: location.id,
-              amount: totalAmount,
-              order_type: 'dine_in'
-          });
+          let data;
+          const payload = {
+            cart_id: cart.id,
+            location_id: location.id,
+            amount: totalAmount,
+            order_type: 'dine_in'
+          };
+
+          if (slug === 'staff') {
+             data = await generateStaffQr(payload);
+          } else {
+             data = await generatePromptPayQr(payload);
+          }
           
           localStorage.setItem(QR_STORAGE_KEY, JSON.stringify(data));
           setQrData(data);
@@ -117,14 +133,23 @@ export const usePromptPay = (
       
       setLoadingQr(true);
       try {
-          const statusData = await checkPromptPayStatus(qrData.token);
-          if (statusData.status === 'confirmed') {
-              localStorage.removeItem(QR_STORAGE_KEY);
-              setQrData(null);
-              setOrderPlaced(true);
-          } else {
-              alert("Payment is still pending. Please scan the QR code.");
-          }
+        let isConfirmed = false;
+        
+        if (qrData.qr_type === 'staff') {
+            const statusData = await checkPaymentStatus(qrData.token);
+            if (statusData.status === 'confirmed') isConfirmed = true;
+        } else {
+            const statusData = await checkPromptPayStatus(qrData.token);
+            if (statusData.status === 'confirmed') isConfirmed = true;
+        }
+
+        if (isConfirmed) {
+            localStorage.removeItem(QR_STORAGE_KEY);
+            setQrData(null);
+            setOrderPlaced(true);
+        } else {
+            alert("Payment is still pending. Please scan the QR code.");
+        }
       } catch (err: any) {
           console.error("Manual check failed", err);
           alert("Could not check status: " + (err.message || "Unknown error"));

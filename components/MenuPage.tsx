@@ -5,6 +5,7 @@ import { fetchProducts, checkPaymentStatus } from '../services/api';
 import { ErrorDisplay } from './ErrorDisplay';
 import { ProductCard } from './ProductCard';
 import { useCart } from '../hooks/useCart';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface MenuPageProps {
   location: LocationData;
@@ -28,6 +29,7 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
   const [orderStatusMessage, setOrderStatusMessage] = useState<string | null>(null);
 
   const { cart, addToCart, total } = useCart();
+  const { formatPrice } = useCurrency();
 
   const cartItemCount = cart?.items ? cart.items.reduce((acc, item) => acc + Number(item.quantity), 0) : 0;
   const cartTotal = total || 0;
@@ -321,7 +323,7 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
                             <div className="flex flex-col items-start">
                                 <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total</span>
                                 <span className="text-xl font-bold tracking-tight">
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cartTotal)}
+                                    {formatPrice(cartTotal)}
                                 </span>
                             </div>
                         </div>

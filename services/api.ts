@@ -1,4 +1,4 @@
-import { LocationData, Zone, Product, Cart, PaymentMethod, PromptPayQrData, PromptPayStatusData, TableSessionData, OrderHistoryData } from '../types';
+import { LocationData, Zone, Product, Cart, PaymentMethod, PromptPayQrData, PromptPayStatusData, TableSessionData, OrderHistoryData, StaffQrData, Currency } from '../types';
 
 const API_BASE = "https://qrmenu.demo.picosbs.com/api/v1/qr-menu";
 const API_TOKEN = "061a5b0a27511d1e1f94bc970df0db43962d7fc72fb7099c175d99403113d9d9";
@@ -237,10 +237,32 @@ export const fetchPaymentMethods = async (): Promise<PaymentMethod[]> => {
     method: 'GET'
   });
 
+  let methods: PaymentMethod[] = [];
   if (json.success && Array.isArray(json.data)) {
-    return json.data;
+    methods = json.data;
   }
-  throw new Error(json.message || "Failed to fetch payment methods");
+
+  // Inject "Pay to Staff" method
+  methods.push({
+    id: 9999, // Arbitrary high ID to avoid conflict
+    name: "Pay to Staff",
+    slug: "staff",
+    logo: "",
+    logo_url: "",
+    payment_account_id: 0,
+    note: "Show QR code to staff",
+    is_enable: 1,
+    is_default: 0,
+    payment_account: {
+        id: 0,
+        name: "Pay to Staff",
+        account_number: "Show QR",
+        account_type: "Staff",
+        description: "Staff member will scan your QR code"
+    }
+  });
+
+  return methods;
 };
 
 export const generatePromptPayQr = async (payload: {
@@ -261,6 +283,26 @@ export const generatePromptPayQr = async (payload: {
     return json.data;
   }
   throw new Error(json.message || "Failed to generate QR code");
+};
+
+export const generateStaffQr = async (payload: {
+  cart_id: number;
+  location_id: number | string;
+  amount: number;
+  order_type: string;
+}): Promise<StaffQrData> => {
+  const json = await apiRequest('/payments/staff/qr', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (json.success && json.data) {
+    return json.data;
+  }
+  throw new Error(json.message || "Failed to generate staff QR");
 };
 
 export const checkPromptPayStatus = async (token: string): Promise<PromptPayStatusData> => {
@@ -357,4 +399,15 @@ export const fetchOrderHistory = async (sessionId: string): Promise<OrderHistory
     return json.data;
   }
   throw new Error(json.message || "Failed to fetch order history");
+};
+
+export const fetchDefaultCurrency = async (): Promise<Currency> => {
+  const json = await apiRequest('/default-currency', {
+    method: 'GET'
+  });
+
+  if (json.success && json.data) {
+    return json.data;
+  }
+  throw new Error(json.message || "Failed to fetch currency");
 };

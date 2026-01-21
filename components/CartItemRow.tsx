@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Trash2, Plus, Minus } from 'lucide-react';
 import { CartItem } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -10,6 +11,7 @@ interface CartItemRowProps {
 }
 
 export const CartItemRow: React.FC<CartItemRowProps> = ({ item, isUpdating, onUpdateQuantity, onRemove }) => {
+  const { formatPrice } = useCurrency();
   const name = item.variant?.fullName || item.product_full_name || "Unknown Item";
   
   const image = item.product?.product_image || 
@@ -53,7 +55,7 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item, isUpdating, onUp
         <div>
           <h3 className="font-semibold text-gray-900 truncate pr-2">{name}</h3>
           <div className="text-sm text-gray-500 mt-1">
-             <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(item.uom_price))}</span>
+             <span>{formatPrice(Number(item.uom_price))}</span>
           </div>
         </div>
         
@@ -69,7 +71,7 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item, isUpdating, onUp
 
       <div className="flex flex-col items-end space-y-3 z-20">
          <div className={`font-bold text-gray-900 text-lg transition-transform duration-300 ${highlight ? 'scale-110 text-orange-600' : ''}`}>
-              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(item.uom_price) * quantity)}
+              {formatPrice(Number(item.uom_price) * quantity)}
          </div>
          
          <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 h-9 overflow-hidden">

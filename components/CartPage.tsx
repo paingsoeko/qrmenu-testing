@@ -10,6 +10,7 @@ import { PromptPayDisplay } from './PromptPayDisplay';
 import { ManualPaymentDisplay } from './ManualPaymentDisplay';
 import { OrderSuccessView } from './OrderSuccessView';
 import { ConfirmationModal } from './ConfirmationModal';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface CartPageProps {
   onBack: () => void;
@@ -20,12 +21,16 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
   // Logic extracted to hooks
   const { cart, loading, error, updatingItems, updateQuantity, removeItem, total, refreshCart } = useCart();
   const { qrData, loadingQr, qrError, orderPlaced, setOrderPlaced, generateQr, manualCheckStatus, cancelQr } = usePromptPay(cart, location, total);
+  const { formatPrice } = useCurrency();
   
   const [showPayment, setShowPayment] = useState(false);
   const [manualMethod, setManualMethod] = useState<PaymentMethod | null>(null);
   const [animateTotal, setAnimateTotal] = useState(false);
   const [prevTotal, setPrevTotal] = useState(total);
   const [itemToRemove, setItemToRemove] = useState<number | null>(null);
+  
+  // Track selected payment method for success screen logic
+  const [selectedPaymentSlug, setSelectedPaymentSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (total !== prevTotal) {
@@ -52,7 +57,7 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
   }
 
   if (orderPlaced) {
-    return <OrderSuccessView onBack={onBack} />;
+    return <OrderSuccessView onBack={onBack} paymentSlug={selectedPaymentSlug || ''} />;
   }
 
   if (qrData) {
@@ -90,8 +95,9 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
             total={total}
             onBack={() => setShowPayment(false)}
             onConfirm={(method) => {
-                if (method.slug === 'stripe' || method.slug === 'promptpay') {
-                    generateQr();
+                setSelectedPaymentSlug(method.slug);
+                if (method.slug === 'stripe' || method.slug === 'promptpay' || method.slug === 'staff') {
+                    generateQr(method.slug);
                 } else {
                     setManualMethod(method);
                 }
@@ -139,16 +145,16 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 space-y-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <div className="flex justify-between text-stone-600">
             <span>Subtotal</span>
-            <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</span>
+            <span>{formatPrice(total)}</span>
           </div>
           <div className="flex justify-between text-stone-600">
             <span>Service Charge (0%)</span>
-            <span>$0.00</span>
+            <span>{formatPrice(0)}</span>
           </div>
           <div className="border-t border-stone-100 pt-3 flex justify-between items-center">
             <span className="font-bold text-stone-900 text-lg">Total</span>
             <span className={`font-bold text-stone-800 text-xl transition-transform duration-300 inline-block ${animateTotal ? 'scale-110' : ''}`}>
-              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}
+              {formatPrice(total)}
             </span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Check, Loader2 } from 'lucide-react';
 import { Product } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ProductCardProps {
   product: Product;
@@ -11,12 +12,10 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, viewMode = 'grid' }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { formatPrice } = useCurrency();
 
   const imageUrl = product.image || `https://picsum.photos/seed/${product.id}/400/300`;
-  const formattedPrice = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(Number(product.price));
+  const formattedPrice = formatPrice(Number(product.price));
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();

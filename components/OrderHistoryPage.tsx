@@ -3,6 +3,7 @@ import { Loader2, Receipt, Clock, ChefHat, CheckCircle, XCircle, ShoppingBag, Al
 import { fetchOrderHistory, getSessionId } from '../services/api';
 import { OrderHistoryData, Order, OrderSaleItem } from '../types';
 import { ErrorDisplay } from './ErrorDisplay';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface OrderHistoryPageProps {
     onBack: () => void;
@@ -13,6 +14,7 @@ export const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onBack }) =>
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'current' | 'past'>('current');
+    const { formatPrice } = useCurrency();
 
     const loadHistory = async () => {
         setLoading(true);
@@ -130,7 +132,7 @@ export const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onBack }) =>
                                     <div className="text-right">
                                         <span className="block text-xs text-gray-500 mb-0.5">Total</span>
                                         <span className="font-bold text-gray-900 text-lg">
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(order.total_amount))}
+                                            {formatPrice(order.total_amount)}
                                         </span>
                                     </div>
                                 </div>
@@ -157,11 +159,11 @@ export const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onBack }) =>
                                                         <div className="flex justify-between items-start">
                                                             <span className="text-sm font-medium text-gray-800 line-clamp-1">{productName}</span>
                                                             <span className="text-sm font-medium text-gray-900">
-                                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(item.subtotal))}
+                                                                {formatPrice(item.subtotal)}
                                                             </span>
                                                         </div>
                                                         <div className="text-xs text-gray-500 mt-0.5">
-                                                            Qty: {Number(item.quantity)} × {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(item.uom_price))}
+                                                            Qty: {Number(item.quantity)} × {formatPrice(item.uom_price)}
                                                         </div>
                                                     </div>
                                                 </div>

@@ -7,6 +7,7 @@ import { CartPage } from './components/CartPage';
 import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { LocationData, Table } from './types';
 import { AlertCircle } from 'lucide-react';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 const STORAGE_KEYS = {
   LOCATION: 'qr_menu_location',
@@ -165,50 +166,52 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-        <Header 
-          title={title} 
-          subtitle={subtitle}
-          onBack={onBack}
-          onHistory={() => setIsViewingHistory(true)}
-          showHistory={showHistoryButton}
-        />
+      <CurrencyProvider>
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+          <Header 
+            title={title} 
+            subtitle={subtitle}
+            onBack={onBack}
+            onHistory={() => setIsViewingHistory(true)}
+            showHistory={showHistoryButton}
+          />
 
-        <main className="flex-1 flex flex-col">
-          {isViewingCart ? (
-            <CartPage 
-              onBack={() => setIsViewingCart(false)} 
-              location={selectedLocation} 
-            />
-          ) : isViewingHistory ? (
-            <OrderHistoryPage 
-              onBack={() => setIsViewingHistory(false)} 
-            />
-          ) : selectedTable && selectedLocation ? (
-            <MenuPage 
-              location={selectedLocation} 
-              table={selectedTable} 
-              onViewCart={() => setIsViewingCart(true)}
-            />
-          ) : selectedLocation ? (
-            <TableSelection 
-              location={selectedLocation} 
-              onSelect={setSelectedTable} 
-            />
-          ) : (
-            <LocationSelection onSelect={handleLocationSelect} />
+          <main className="flex-1 flex flex-col">
+            {isViewingCart ? (
+              <CartPage 
+                onBack={() => setIsViewingCart(false)} 
+                location={selectedLocation} 
+              />
+            ) : isViewingHistory ? (
+              <OrderHistoryPage 
+                onBack={() => setIsViewingHistory(false)} 
+              />
+            ) : selectedTable && selectedLocation ? (
+              <MenuPage 
+                location={selectedLocation} 
+                table={selectedTable} 
+                onViewCart={() => setIsViewingCart(true)}
+              />
+            ) : selectedLocation ? (
+              <TableSelection 
+                location={selectedLocation} 
+                onSelect={setSelectedTable} 
+              />
+            ) : (
+              <LocationSelection onSelect={handleLocationSelect} />
+            )}
+          </main>
+
+          {/* Footer (only show on selection screens to save space on menu) */}
+          {!selectedTable && !isViewingCart && !isViewingHistory && (
+            <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
+              <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
+                <p>© {new Date().getFullYear()} GourmetQR. All rights reserved.</p>
+              </div>
+            </footer>
           )}
-        </main>
-
-        {/* Footer (only show on selection screens to save space on menu) */}
-        {!selectedTable && !isViewingCart && !isViewingHistory && (
-          <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
-              <p>© {new Date().getFullYear()} GourmetQR. All rights reserved.</p>
-            </div>
-          </footer>
-        )}
-      </div>
+        </div>
+      </CurrencyProvider>
     </ErrorBoundary>
   );
 };

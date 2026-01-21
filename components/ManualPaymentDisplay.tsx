@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Loader2, ArrowLeft, Upload, CheckCircle, Image as LucideImage, CreditCard, Copy, X } from 'lucide-react';
 import { PaymentMethod } from '../types';
 import { requestManualPayment } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ManualPaymentDisplayProps {
   paymentMethod: PaymentMethod;
@@ -25,6 +26,7 @@ export const ManualPaymentDisplay: React.FC<ManualPaymentDisplayProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { formatPrice } = useCurrency();
 
   // Guard clause for missing prop
   if (!paymentMethod) return null;
@@ -161,7 +163,7 @@ export const ManualPaymentDisplay: React.FC<ManualPaymentDisplayProps> = ({
                     <div className="flex flex-col items-center justify-center bg-gray-900 text-white py-4 px-6 rounded-2xl shadow-lg shadow-gray-200">
                         <span className="text-xs font-medium opacity-80 uppercase tracking-widest mb-1">Total Amount</span>
                         <span className="text-3xl font-bold tracking-tight">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}
+                            {formatPrice(total)}
                         </span>
                     </div>
                 </div>

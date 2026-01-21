@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, ArrowLeft, CreditCard, Wallet, CheckCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, CreditCard, Wallet, CheckCircle, UserCircle2 } from 'lucide-react';
 import { PaymentMethod } from '../types';
 import { fetchPaymentMethods } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface PaymentMethodSelectorProps {
   total: number;
@@ -15,6 +16,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ to
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     const loadMethods = async () => {
@@ -49,6 +51,16 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ to
 
   const isProcessing = loadingExternal || isSubmitting;
 
+  const renderIcon = (method: PaymentMethod) => {
+      if (method.logo_url) {
+          return <img src={method.logo_url} alt={method.name} className="w-full h-full object-contain" />;
+      }
+      if (method.slug === 'staff') {
+          return <UserCircle2 className="w-6 h-6 text-stone-600" />;
+      }
+      return <Wallet className="w-5 h-5 text-stone-400" />;
+  };
+
   return (
     <div className="max-w-3xl mx-auto w-full px-4 py-6 pb-32 animate-in slide-in-from-right duration-300">
         <div className="mb-6 flex items-center">
@@ -66,7 +78,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ to
              <div className="flex justify-between items-center mb-4">
                  <span className="text-stone-500">Total Amount</span>
                  <span className="text-xl font-bold text-stone-800">
-                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}
+                     {formatPrice(total)}
                  </span>
              </div>
              <div className="h-px bg-stone-100 w-full mb-4"></div>
@@ -98,16 +110,15 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ to
                             `}
                         >
                             <div className="h-10 w-10 rounded-lg overflow-hidden bg-white border border-stone-200 flex-shrink-0 flex items-center justify-center p-1">
-                                {method.logo_url ? (
-                                    <img src={method.logo_url} alt={method.name} className="w-full h-full object-contain" />
-                                ) : (
-                                    <Wallet className="w-5 h-5 text-stone-400" />
-                                )}
+                                {renderIcon(method)}
                             </div>
                             <div className="ml-4 flex-1 text-left">
                                 <span className={`block font-semibold ${selectedId === method.id ? 'text-stone-900' : 'text-stone-700'}`}>{method.name}</span>
-                                {method.payment_account?.account_number && (
+                                {method.payment_account?.account_number && method.slug !== 'staff' && (
                                     <span className="text-xs text-stone-500 block mt-0.5">{method.payment_account.account_number}</span>
+                                )}
+                                {method.slug === 'staff' && (
+                                    <span className="text-xs text-stone-500 block mt-0.5">Show QR code to staff</span>
                                 )}
                             </div>
                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-300 ${selectedId === method.id ? 'border-stone-800 bg-stone-800' : 'border-stone-300'}`}>

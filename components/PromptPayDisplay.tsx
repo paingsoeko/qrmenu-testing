@@ -1,6 +1,7 @@
 import React from 'react';
-import { Loader2, ArrowLeft, QrCode } from 'lucide-react';
+import { Loader2, ArrowLeft, QrCode, User } from 'lucide-react';
 import { PromptPayQrData } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface PromptPayDisplayProps {
   data: PromptPayQrData;
@@ -10,23 +11,28 @@ interface PromptPayDisplayProps {
 }
 
 export const PromptPayDisplay: React.FC<PromptPayDisplayProps> = ({ data, loading, onCheckStatus, onCancel }) => {
+  const isStaff = data.qr_type === 'staff';
+  const { currency } = useCurrency(); // Get global currency for fallback if needed
+
   return (
     <div className="max-w-3xl mx-auto w-full px-4 py-6 pb-32 animate-in slide-in-from-right duration-300">
         <div className="mb-6 flex items-center">
             <button onClick={onCancel} className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-600 mr-2">
                 <ArrowLeft className="w-5 h-5" />
             </button>
-            <h2 className="text-lg font-bold text-gray-900">Scan to Pay</h2>
+            <h2 className="text-lg font-bold text-gray-900">{isStaff ? "Pay to Staff" : "Scan to Pay"}</h2>
         </div>
 
         <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center text-center">
-            <div className="bg-orange-50 p-4 rounded-2xl mb-6">
-               <QrCode className="w-8 h-8 text-orange-600" />
+            <div className={`${isStaff ? 'bg-blue-50' : 'bg-orange-50'} p-4 rounded-2xl mb-6`}>
+               {isStaff ? <User className="w-8 h-8 text-blue-600" /> : <QrCode className="w-8 h-8 text-orange-600" />}
             </div>
             
-            <h3 className="text-xl font-bold text-gray-900 mb-2">PromptPay QR Code</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{isStaff ? "Staff Payment QR" : "PromptPay QR Code"}</h3>
             <p className="text-gray-500 mb-8 max-w-xs mx-auto">
-                Please scan the QR code below using your banking app to complete the payment.
+                {isStaff 
+                  ? "Please show this QR code to the staff member to complete your payment." 
+                  : "Please scan the QR code below using your banking app to complete the payment."}
             </p>
 
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6">
@@ -37,7 +43,7 @@ export const PromptPayDisplay: React.FC<PromptPayDisplayProps> = ({ data, loadin
                 />
             </div>
             
-            {data.instruction_url && (
+            {!isStaff && data.instruction_url && (
                 <a 
                     href={data.instruction_url} 
                     target="_blank" 
@@ -51,7 +57,7 @@ export const PromptPayDisplay: React.FC<PromptPayDisplayProps> = ({ data, loadin
             <div className="mb-8">
                 <p className="text-sm text-gray-500 uppercase tracking-wide font-semibold mb-1">Total Amount</p>
                 <p className="text-3xl font-bold text-gray-900">
-                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency || 'THB' }).format(data.amount)}
+                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency || currency.code || 'THB' }).format(data.amount)}
                 </p>
             </div>
             
