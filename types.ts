@@ -1,3 +1,4 @@
+
 export interface LocationData {
   id: number | string;
   name: string;
@@ -136,6 +137,47 @@ export interface PromptPayStatusData {
   amount: number;
   currency: string;
   paid_at?: string | null;
+}
+
+// Order History Types
+
+export interface OrderSaleItem {
+  id: number;
+  product_id: number;
+  quantity: string | number;
+  uom_price: string | number;
+  subtotal: string | number;
+  variation?: {
+    fullName?: string;
+    product?: {
+      name: string;
+      product_image?: string;
+      image?: string;
+    };
+  };
+}
+
+export interface OrderSale {
+  id: number;
+  sales_voucher_no: string;
+  status: string;
+  payment_status: string;
+  items: OrderSaleItem[];
+}
+
+export interface Order {
+  id: number;
+  order_number: string;
+  status: 'pending' | 'cooking' | 'ready' | 'served' | 'cancelled' | 'completed';
+  total_amount: string | number;
+  created_at: string;
+  sale?: OrderSale;
+  details?: any[]; // Fallback if sale is missing
+}
+
+export interface OrderHistoryData {
+  current_orders: Order[];
+  past_orders: Order[];
 }
 
 export interface ApiResponse<T> {

@@ -1,4 +1,4 @@
-import { LocationData, Zone, Product, Cart, PaymentMethod, PromptPayQrData, PromptPayStatusData, TableSessionData } from '../types';
+import { LocationData, Zone, Product, Cart, PaymentMethod, PromptPayQrData, PromptPayStatusData, TableSessionData, OrderHistoryData } from '../types';
 
 const API_BASE = "https://qrmenu.demo.picosbs.com/api/v1/qr-menu";
 const API_TOKEN = "061a5b0a27511d1e1f94bc970df0db43962d7fc72fb7099c175d99403113d9d9";
@@ -272,4 +272,15 @@ export const checkPromptPayStatus = async (token: string): Promise<PromptPayStat
     return json.data;
   }
   throw new Error(json.message || "Failed to check payment status");
+};
+
+export const fetchOrderHistory = async (sessionId: string): Promise<OrderHistoryData> => {
+  const json = await apiRequest(`/order-history?session_id=${sessionId}`, {
+    method: 'GET'
+  });
+
+  if (json.success && json.data) {
+    return json.data;
+  }
+  throw new Error(json.message || "Failed to fetch order history");
 };

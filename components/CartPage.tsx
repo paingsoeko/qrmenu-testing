@@ -8,6 +8,7 @@ import { CartItemRow } from './CartItemRow';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PromptPayDisplay } from './PromptPayDisplay';
 import { OrderSuccessView } from './OrderSuccessView';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface CartPageProps {
   onBack: () => void;
@@ -22,6 +23,7 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [animateTotal, setAnimateTotal] = useState(false);
   const [prevTotal, setPrevTotal] = useState(total);
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
 
   useEffect(() => {
     if (total !== prevTotal) {
@@ -106,7 +108,7 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
                 item={item}
                 isUpdating={updatingItems.has(item.id)}
                 onUpdateQuantity={updateQuantity}
-                onRemove={removeItem}
+                onRemove={(id) => setItemToRemove(id)}
             />
           ))
         )}
@@ -151,6 +153,17 @@ export const CartPage: React.FC<CartPageProps> = ({ onBack, location }) => {
             </div>
         </div>
       )}
+
+      <ConfirmationModal 
+         isOpen={itemToRemove !== null}
+         onCancel={() => setItemToRemove(null)}
+         onConfirm={() => {
+             if (itemToRemove) removeItem(itemToRemove);
+             setItemToRemove(null);
+         }}
+         title="Remove Item?"
+         message="Are you sure you want to remove this item from your cart?"
+      />
     </div>
   );
 };

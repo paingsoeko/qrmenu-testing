@@ -4,12 +4,14 @@ import { LocationSelection } from './components/LocationSelection';
 import { TableSelection } from './components/TableSelection';
 import { MenuPage } from './components/MenuPage';
 import { CartPage } from './components/CartPage';
+import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { LocationData, Table } from './types';
 
 const STORAGE_KEYS = {
   LOCATION: 'qr_menu_location',
   TABLE: 'qr_menu_table',
-  VIEWING_CART: 'qr_menu_viewing_cart'
+  VIEWING_CART: 'qr_menu_viewing_cart',
+  VIEWING_HISTORY: 'qr_menu_viewing_history'
 };
 
 const App: React.FC = () => {
@@ -45,6 +47,14 @@ const App: React.FC = () => {
     }
   });
 
+  const [isViewingHistory, setIsViewingHistory] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.VIEWING_HISTORY) === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
   // Persist state changes to localStorage
   useEffect(() => {
     if (selectedLocation) {
@@ -70,15 +80,30 @@ const App: React.FC = () => {
     }
   }, [isViewingCart]);
 
+  useEffect(() => {
+    if (isViewingHistory) {
+      localStorage.setItem(STORAGE_KEYS.VIEWING_HISTORY, 'true');
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.VIEWING_HISTORY);
+    }
+  }, [isViewingHistory]);
+
   // Determine current view title and subtitle
   let title = "GourmetQR";
   let subtitle = "Select a Location";
   let onBack: (() => void) | undefined = undefined;
+  
+  // Show history button only when a table is selected (active session)
+  const showHistoryButton = !!selectedTable && !isViewingCart && !isViewingHistory;
 
   if (isViewingCart) {
     title = "Order Summary";
     subtitle = "Review your items";
     onBack = () => setIsViewingCart(false);
+  } else if (isViewingHistory) {
+    title = "Order History";
+    subtitle = "My past orders";
+    onBack = () => setIsViewingHistory(false);
   } else if (selectedTable && selectedLocation) {
     title = "Menu";
     subtitle = `${selectedLocation.name} • ${selectedTable.display_name}`;
@@ -101,6 +126,8 @@ const App: React.FC = () => {
         title={title} 
         subtitle={subtitle}
         onBack={onBack}
+        onHistory={() => setIsViewingHistory(true)}
+        showHistory={showHistoryButton}
       />
 
       <main className="flex-1 flex flex-col">
@@ -108,6 +135,10 @@ const App: React.FC = () => {
           <CartPage 
             onBack={() => setIsViewingCart(false)} 
             location={selectedLocation} 
+          />
+        ) : isViewingHistory ? (
+          <OrderHistoryPage 
+            onBack={() => setIsViewingHistory(false)} 
           />
         ) : selectedTable && selectedLocation ? (
           <MenuPage 
@@ -126,7 +157,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer (only show on selection screens to save space on menu) */}
-      {!selectedTable && !isViewingCart && (
+      {!selectedTable && !isViewingCart && !isViewingHistory && (
         <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
           <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
             <p>© {new Date().getFullYear()} GourmetQR. All rights reserved.</p>

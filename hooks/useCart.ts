@@ -119,8 +119,7 @@ export const useCart = () => {
   };
 
   const removeItem = async (itemId: number) => {
-    if (!window.confirm("Are you sure you want to remove this item?")) return;
-
+    // Confirmation is now handled by the UI component
     setUpdatingItems(prev => new Set(prev).add(itemId));
     try {
         const sessionId = getSessionId();

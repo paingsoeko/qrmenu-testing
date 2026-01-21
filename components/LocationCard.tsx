@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Phone, ChevronRight, Timer } from 'lucide-react';
+import { MapPin, ChevronRight, Timer, Store, Star } from 'lucide-react';
 import { LocationData } from '../types';
 
 interface LocationCardProps {
@@ -9,58 +9,48 @@ interface LocationCardProps {
 }
 
 export const LocationCard: React.FC<LocationCardProps> = ({ location, onSelect, index = 0 }) => {
-  const imageUrl = location.image || `https://picsum.photos/seed/${location.id}/600/400`;
-
   return (
-    <div 
-      className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform active:scale-[0.98] cursor-pointer border border-gray-100 opacity-0 animate-fade-in-up"
-      style={{ animationDelay: `${index * 100}ms` }}
+    <button 
       onClick={() => onSelect(location)}
+      className="w-full text-left group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-orange-100 transition-all duration-300 transform active:scale-[0.99] animate-fade-in-up flex flex-col h-full"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
-      {/* Image Container */}
-      <div className="relative h-56 overflow-hidden">
-        <img 
-          src={imageUrl} 
-          alt={location.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h3 className="text-white text-2xl font-bold truncate leading-tight mb-1">{location.name}</h3>
-          <div className="flex items-center text-white/90 text-sm">
-             <MapPin className="w-4 h-4 mr-1.5 text-orange-400" />
-             <span className="truncate">{location.address || "Address not available"}</span>
-          </div>
+      <div className="flex justify-between items-start mb-4 w-full">
+        <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300 shadow-sm">
+           <Store className="w-7 h-7" />
         </div>
-
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-700 shadow-sm flex items-center">
-          <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
-          Open Now
+        <div className="flex flex-col items-end">
+             <div className="flex items-center space-x-1 bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Open</span>
+             </div>
         </div>
       </div>
 
-      {/* Action Strip */}
-      <div className="p-4 flex justify-between items-center bg-white">
-         <div className="flex space-x-4 text-gray-500">
-            {location.phone && (
-               <div className="flex items-center text-xs font-medium bg-gray-50 px-2 py-1.5 rounded-lg">
-                 <Phone className="w-3.5 h-3.5 mr-1.5" />
-                 Call
-               </div>
-            )}
-            <div className="flex items-center text-xs font-medium bg-gray-50 px-2 py-1.5 rounded-lg">
-               <Timer className="w-3.5 h-3.5 mr-1.5" />
-               ~ 20 min
+      <div className="mb-4 flex-1">
+        <h3 className="text-xl font-bold text-gray-900 leading-tight mb-2 group-hover:text-orange-600 transition-colors">{location.name}</h3>
+        <div className="flex items-start text-gray-500 text-sm leading-snug">
+           <MapPin className="w-4 h-4 mr-1.5 mt-0.5 flex-shrink-0 text-gray-400" />
+           <span className="line-clamp-2">{location.address || "Address details unavailable"}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-4 border-t border-gray-50 w-full mt-auto">
+         <div className="flex items-center space-x-3 text-xs font-medium text-gray-400">
+            <div className="flex items-center">
+               <Timer className="w-3.5 h-3.5 mr-1 text-orange-400" />
+               <span>15-25 min</span>
+            </div>
+            <div className="flex items-center">
+               <Star className="w-3.5 h-3.5 mr-1 text-yellow-400" />
+               <span>4.8</span>
             </div>
          </div>
-
-         <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+         
+         <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-600 transition-all duration-300">
             <ChevronRight className="w-5 h-5" />
          </div>
       </div>
-    </div>
+    </button>
   );
 };

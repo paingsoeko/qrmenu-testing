@@ -34,90 +34,91 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, 
     }
   };
 
-  const renderAddButton = (fullWidth: boolean = true) => (
-    <button 
-        onClick={handleAdd}
-        disabled={isAdding}
-        className={`
-        ${fullWidth ? 'w-full' : 'px-4'} h-9 rounded-lg transition-all duration-300 font-semibold text-sm active:scale-95 flex items-center justify-center
-        ${isSuccess 
-            ? 'bg-green-500 text-white shadow-md' 
-            : 'bg-gray-100 text-gray-900 hover:bg-orange-50 hover:text-orange-600 border border-gray-200'}
-        `}
-    >
-        {isAdding ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-        ) : isSuccess ? (
-        <div className="flex items-center space-x-1.5">
-            <Check className="w-4 h-4" />
-            {fullWidth && <span>Added</span>}
-        </div>
-        ) : (
-        <div className="flex items-center space-x-1.5">
-            <Plus className="w-4 h-4" />
-            <span>Add</span>
-        </div>
-        )}
-    </button>
-  );
-
-  // LIST VIEW LAYOUT
   if (viewMode === 'list') {
     return (
-        <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex gap-4 h-32 hover:shadow-md transition-all duration-300">
-            <div className="w-28 h-full rounded-xl overflow-hidden bg-gray-50 shrink-0 relative">
+        <div className="group bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 flex gap-4 h-28 hover:shadow-lg hover:border-orange-100 transition-all duration-300 overflow-hidden relative">
+             {/* Image */}
+            <div className="w-24 h-full rounded-xl overflow-hidden bg-gray-50 shrink-0 relative">
                 <img
                     src={imageUrl}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                 />
             </div>
             
-            <div className="flex-1 flex flex-col justify-between py-0.5">
+            <div className="flex-1 flex flex-col justify-between py-1 pr-1">
                 <div>
-                    <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-gray-900 text-sm sm:text-base leading-tight line-clamp-2 pr-2">{product.name}</h3>
-                        <span className="font-bold text-gray-900 text-sm whitespace-nowrap">{formattedPrice}</span>
-                    </div>
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base leading-tight line-clamp-1 mb-1 group-hover:text-orange-600 transition-colors">{product.name}</h3>
                     <p className="text-gray-500 text-xs line-clamp-2 leading-relaxed">
-                        {product.description || "Freshly prepared."}
+                        {product.description || "No description available."}
                     </p>
                 </div>
                 
-                <div className="flex justify-end mt-2">
-                    {renderAddButton(false)}
+                <div className="flex justify-between items-end mt-2">
+                    <span className="font-bold text-gray-900 text-base">{formattedPrice}</span>
+                    <button 
+                        onClick={handleAdd}
+                        disabled={isAdding}
+                        className={`
+                        w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm active:scale-95
+                        ${isSuccess ? 'bg-green-500 text-white' : 'bg-gray-900 text-white hover:bg-orange-600'}
+                        `}
+                    >
+                        {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : isSuccess ? <Check className="w-4 h-4" /> : <Plus className="w-5 h-5" />}
+                    </button>
                 </div>
             </div>
         </div>
     );
   }
 
-  // GRID VIEW LAYOUT (Default)
+  // Grid view
   return (
-    <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 h-full flex flex-col hover:shadow-lg transition-all duration-300">
+    <div className="group bg-white rounded-2xl p-3 shadow-sm border border-gray-100 h-full flex flex-col hover:shadow-xl hover:border-orange-100 transition-all duration-300 relative overflow-hidden">
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gray-50">
         <img
           src={imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
           loading="lazy"
         />
-        {/* Price Badge on Image */}
-        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-sm">
-             <span className="font-bold text-gray-900 text-sm">{formattedPrice}</span>
+        {/* Floating Price Tag */}
+        <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-gray-900 border border-gray-100">
+             {formattedPrice}
         </div>
       </div>
       
       <div className="flex-1 flex flex-col">
-        <h3 className="font-bold text-gray-900 text-base leading-tight mb-1">{product.name}</h3>
-        <p className="text-gray-500 text-xs line-clamp-2 mb-4 flex-1 leading-relaxed">
-          {product.description || "Freshly prepared for you."}
+        <h3 className="font-bold text-gray-900 text-base leading-tight mb-1 group-hover:text-orange-600 transition-colors">{product.name}</h3>
+        <p className="text-gray-500 text-xs line-clamp-2 mb-4 flex-1">
+          {product.description}
         </p>
         
-        <div className="mt-auto">
-            {renderAddButton(true)}
-        </div>
+        <button 
+            onClick={handleAdd}
+            disabled={isAdding}
+            className={`
+            w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center space-x-2 active:scale-95
+            ${isSuccess 
+                ? 'bg-green-500 text-white shadow-green-200' 
+                : 'bg-gray-50 text-gray-900 hover:bg-orange-600 hover:text-white'}
+            `}
+        >
+            {isAdding ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isSuccess ? (
+                <>
+                    <Check className="w-4 h-4" />
+                    <span>Added</span>
+                </>
+            ) : (
+                <>
+                    <Plus className="w-4 h-4" />
+                    <span>Add to Order</span>
+                </>
+            )}
+        </button>
       </div>
     </div>
   );

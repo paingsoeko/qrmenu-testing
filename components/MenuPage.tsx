@@ -104,33 +104,33 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
     <div className="w-full pb-32 bg-gray-50 min-h-screen relative">
       
       {/* Sticky Search & Filter Header */}
-      <div className="sticky top-16 z-30 glass-panel border-b border-gray-200/50 shadow-sm transition-all duration-300">
+      <div className="sticky top-16 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 py-3">
             {/* Search and Toggle Row */}
             <div className="flex items-center gap-3 mb-3">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="relative flex-1 group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                     <input
                         type="text"
-                        className="block w-full pl-9 pr-4 py-2.5 bg-gray-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors"
-                        placeholder="Search menu..."
+                        className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all shadow-sm"
+                        placeholder="Search for food, drinks..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 
                 {/* View Toggle */}
-                <div className="flex bg-gray-100 p-1 rounded-xl shrink-0">
+                <div className="flex bg-gray-100 p-1 rounded-xl shrink-0 border border-gray-200">
                     <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'grid' ? 'bg-white shadow-sm text-orange-600 scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'grid' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-400 hover:text-gray-600'}`}
                         aria-label="Grid View"
                     >
                         <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'list' ? 'bg-white shadow-sm text-orange-600 scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'list' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-400 hover:text-gray-600'}`}
                         aria-label="List View"
                     >
                         <List className="w-5 h-5" />
@@ -139,16 +139,16 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
             </div>
 
             {/* Categories */}
-            <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+            <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 mask-fade-right">
             {categories.map((category) => (
                 <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`
-                    flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200
+                    flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 border
                     ${selectedCategory === category 
-                    ? 'bg-gray-900 text-white shadow-md transform scale-105' 
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}
+                    ? 'bg-gray-900 text-white border-gray-900 shadow-lg shadow-gray-200 transform scale-105' 
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300'}
                 `}
                 >
                 {category !== 'All' && getCategoryIcon(category)}
@@ -164,7 +164,7 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
         {filteredProducts.length > 0 ? (
             <div className={viewMode === 'grid' 
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" 
-                : "flex flex-col space-y-4"
+                : "flex flex-col space-y-3"
             }>
             {filteredProducts.map((product, idx) => (
                 <div key={product.id} className="animate-fade-in-up" style={{ animationDelay: `${idx < 10 ? idx * 50 : 0}ms` }}>
@@ -173,10 +173,13 @@ export const MenuPage: React.FC<MenuPageProps> = ({ location, table, onViewCart 
             ))}
             </div>
         ) : (
-            <div className="text-center py-20 opacity-60">
-                <Utensils className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900">No matching items</h3>
-                <button onClick={() => {setSearchTerm(''); setSelectedCategory('All');}} className="text-orange-600 font-medium mt-2">Clear filters</button>
+            <div className="flex flex-col items-center justify-center py-20 opacity-60">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                     <Utensils className="w-10 h-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">No items found</h3>
+                <p className="text-gray-500 text-sm mt-1">Try adjusting your filters</p>
+                <button onClick={() => {setSearchTerm(''); setSelectedCategory('All');}} className="text-orange-600 font-bold mt-4 hover:underline">Clear all filters</button>
             </div>
         )}
       </div>
